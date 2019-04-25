@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function(){
   drawChart();
 });
 
-// Functions
+// FUNCTIONS
 //
 // pushData
 // push data to a specific array
@@ -65,6 +65,17 @@ function getMedian(values) {
   return isEven ? (numbers[middle] + numbers[middle - 1]) / 2 : numbers[middle];
 }
 
+// removeText
+// Remove the text in the info area
+function removeText(){
+  d3.select(' .info .current-user-id span').text('');
+  d3.select(' .info .current-user-name span').text('');
+  d3.select(' .info .current-user-email span').text('');
+  d3.select(' .info .current-user-address span').text('');
+  d3.select(' .info .current-user-ip span').text('');
+  d3.select(' .info .current-transaction-refused span').text('');
+}
+
 function drawChart() {
   // Setup
   let margin = {left:100, top:100, right:100, bottom:100};
@@ -103,16 +114,13 @@ function drawChart() {
     // Remove the last 2 elements (TRANSACTION_REFUSED & CUSTOMER_FRAUDED_ONCE) since they are not used for the chart structure
     dataKeys.length = dataKeys.length - 2;
 
-    // Dimensions for ordinal scale
-
-
     // SCALES
     // let xScale = d3.scaleLinear().range([0, height]).domain(0, dataKeys.length);
-    let uidScale = d3.scalePoint().range([margin.top / 2, height]).domain(userKey);
-    let unameScale = d3.scalePoint().range([margin.top / 2, height]).domain(userName);
-    let uemailScale = d3.scalePoint().range([margin.top / 2, height]).domain(userEmail)
-    let uaddrScale = d3.scalePoint().range([margin.top / 2, height]).domain(userAddress)
-    let uipScale = d3.scalePoint().range([margin.top / 2, height]).domain(userIP)
+    let uidScale = d3.scalePoint().range([margin.top / 2, height + margin.top]).domain(userKey);
+    let unameScale = d3.scalePoint().range([margin.top / 2, height + margin.top]).domain(userName);
+    let uemailScale = d3.scalePoint().range([margin.top / 2, height + margin.top]).domain(userEmail)
+    let uaddrScale = d3.scalePoint().range([margin.top / 2, height + margin.top]).domain(userAddress)
+    let uipScale = d3.scalePoint().range([margin.top / 2, height + margin.top]).domain(userIP)
 
     let uidAx = d3.axisLeft().scale(uidScale);
     let unameAx = d3.axisLeft().scale(unameScale);
@@ -209,20 +217,14 @@ function drawChart() {
       svg.selectAll(' .transaction').style('stroke-opacity', 0);
       svg.selectAll(' .id-' + id).style('stroke-opacity', 0.6);
       svg.selectAll(' .id-' + id).style('opacity', 1);
-      svg.selectAll(' text.id-' + id).attr('transform', 'translate(0, 10)');
+      svg.selectAll(' text.id-' + id).attr('transform', 'translate(0, 15)');
     })
     .on('mouseout', function() {
       svg.selectAll(' .transaction').style('stroke-opacity', 0.5);
       svg.selectAll(' .tick-text').style('opacity', 0);
     })
     .on('click', function() {
-      d3.select(' .info .current-user-id span').text('');
-      d3.select(' .info .current-user-name span').text('');
-      d3.select(' .info .current-user-email span').text('');
-      d3.select(' .info .current-user-address span').text('');
-      d3.select(' .info .current-user-ip span').text('');
-      d3.select(' .info .current-transaction-refused span').text('');
-
+      removeText();
       let id = this.innerHTML;
       let names = [];
       let emails = [];
@@ -249,21 +251,25 @@ function drawChart() {
       ips = _.uniq(ips);
       let percentage = ((refused * 100) / transactions).toFixed(2);
       d3.select(' .cross-icon').style('opacity', 1);
-      d3.select(' .info .current-user-id span').text(id)
-      d3.select(' .info .current-user-name span').text(names.join(', ') + ' (' + names.length + ')')
-      d3.select(' .info .current-user-email span').text(emails.join(', ') + ' (' + emails.length + ')')
-      d3.select(' .info .current-user-address span').text(addresses.join(', ') + ' (' + addresses.length + ')')
-      d3.select(' .info .current-user-ip span').text(ips.join(', ') + ' (' + ips.length + ')')
-      d3.select(' .info .current-transaction-refused span').text( percentage + '% (' +  transactions +')')
+      d3.select(' .info .current-user-id span').classed('expand', true).text(id)
+      d3.select(' .info .current-user-name span').classed('expand', true).text(names.join(', ') + ' (' + names.length + ')')
+      d3.select(' .info .current-user-email span').classed('expand', true).text(emails.join(', ') + ' (' + emails.length + ')')
+      d3.select(' .info .current-user-address span').classed('expand', true).text(addresses.join(', ') + ' (' + addresses.length + ')')
+      d3.select(' .info .current-user-ip span').classed('expand', true).text(ips.join(', ') + ' (' + ips.length + ')')
+      d3.select(' .info .current-transaction-refused span').classed('expand', true).text( percentage + '% (' +  transactions +')')
+      setTimeout(function(){
+        // Reset animation
+        d3.select(' .info .current-user-id span').classed('expand', false)
+        d3.select(' .info .current-user-name span').classed('expand', false)
+        d3.select(' .info .current-user-email span').classed('expand', false)
+        d3.select(' .info .current-user-address span').classed('expand', false)
+        d3.select(' .info .current-user-ip span').classed('expand', false)
+        d3.select(' .info .current-transaction-refused span').classed('expand', false)
+      }, 700)
     })
     d3.select(' .cross-icon').on('click', function(){
       d3.select(' .cross-icon').style('opacity', 0);
-      d3.select(' .info .current-user-id span').text('');
-      d3.select(' .info .current-user-name span').text('');
-      d3.select(' .info .current-user-email span').text('');
-      d3.select(' .info .current-user-address span').text('');
-      d3.select(' .info .current-user-ip span').text('');
-      d3.select(' .info .current-transaction-refused span').text('');
+      removeText();
     })
 
     // Style user id depending on risk
